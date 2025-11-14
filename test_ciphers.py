@@ -4,6 +4,7 @@ from Ciphers.keyword_cipher import KeywordCipher
 from Ciphers.caesar_cipher import CaesarCipher
 from Ciphers.vigenere_cipher import VigenereCipher
 from Ciphers.affine_cipher import AffineCipher
+from Ciphers.playfair_cipher import PlayfairCipher
 
 def test_kc_correct_cipher():
     cypher = KeywordCipher('ZEBRAS')
