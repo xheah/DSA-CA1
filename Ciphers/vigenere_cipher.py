@@ -45,3 +45,6 @@ class VigenereCipher(Cipher):
             decrypted.append(p if ch.isupper() else p.lower())
             ki += 1
         return ''.join(decrypted)
+    
+    def __str__(self):
+        return f"Vigenere Cipher with key: ${self.key}"

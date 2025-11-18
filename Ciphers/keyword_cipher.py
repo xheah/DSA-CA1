@@ -7,11 +7,11 @@ class KeywordCipher(Cipher):
         if not keyword:
             raise ValueError("Keyword must contain at least 1 alphabetic character")
         self._keyword = keyword.upper()
-        self.__keyword_cipher = self._generate_keyword_cipher()
+        self.__keyword_cipher = self.__generate_keyword_cipher()
         # Set up the translation dictionaries using base class method
         self._set_cipher_alphabet(self.__keyword_cipher)
 
-    def _generate_keyword_cipher(self):
+    def __generate_keyword_cipher(self):
         seen = set()
         result = []
         for ch in self._keyword + self._alphabet:

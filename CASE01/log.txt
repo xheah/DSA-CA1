@@ -1,4 +1,0 @@
-Decrypting: fahrenheit451.txt with keyword: MEGATRON as: fahrenheit451_decr.txt
-Decrypting: JaneEyre.txt with keyword: APPLE as: JaneEyre_decr.txt
-Decrypting: mycousinrachel.txt with keyword: GEODUDE as: mycousinrachel_decr.txt
-Decrypting: nineteen84.txt with keyword: RODTANG as: nineteen84_decr.txt

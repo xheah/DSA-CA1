@@ -1,4 +1,9 @@
 import os
+import time
+import threading
+import sys
+import string
+import textwrap
 from pathlib import Path
 from math import gcd
 from Ciphers.keyword_cipher import KeywordCipher
@@ -6,6 +11,7 @@ from Ciphers.caesar_cipher import CaesarCipher
 from Ciphers.affine_cipher import AffineCipher
 from Ciphers.vigenere_cipher import VigenereCipher
 from letterFreq import LFD
+from SmartKeyFinder.decrypter import Decrypter
 
 class Program:
     def __init__(self):
@@ -16,7 +22,7 @@ class Program:
         3. Infer cipher keyword\n
         4. Batch Decryption\n
         5. Encrypt/Decrypt File using different ciphers\n
-        6. Decrypt using NGrams\n
+        6. Decrypt using NGrams (monoalphabetic substitution ciphers only)\n
         7. Exit
         """
 
@@ -186,8 +192,87 @@ class Program:
                 print('Please enter a valid integer for b\n')
         return key 
 
+    def get_crack_method(self) -> str:
+        while True:
+            method = input("Please enter the method to crack the ciphertext ('H' for hill climbing and 'SA' for simulated annealing): ")
+            method = method.strip().upper()
+            if method not in ['H', 'SA']:
+                print('Please enter a valid method')
+                continue
+            return 'hill' if method == 'H' else 'anneal'
+        
+    def loading_animation(self, stop_event: threading.Event, delay: float = 0.3):
+        """
+        Print an animated 'Loading', 'Loading.', 'Loading..', 'Loading...'
+        until stop_event is set
+        """
+        patterns = ["", ".", "..", "..."]
+        idx = 0
 
+        while not stop_event.is_set():
+            dots = patterns[idx]
+            sys.stdout.write('\rDecrypting' + dots + '   ')
+            sys.stdout.flush()
 
+            idx = (idx + 1) % len(patterns)
+            time.sleep(delay)
+        
+        sys.stdout.write('\r' + ' ' * (len('Loading') + 5) + '\r')
+        sys.stdout.flush()
+
+    def format_key_mapping(self, key: str) -> str:
+        """
+        Format the key as two rows:
+        CIPHER: ABCDE...
+        PLAIN : Q.
+        Assumes key is a 26-char string where key[i] = plain for cipher chr(ord('A') + i)
+        """
+        cipher_row = "CIPHER: " + " ".join(string.ascii_uppercase)
+        plain_row  = "PLAIN : " + " ".join(key)  # adjust if key is dict
+        return cipher_row + "\n" + plain_row
+    
+    def get_yn(self, message: str):
+        while True:
+            yn = input(f'{message} (Y/N): ')
+            yn = yn.strip().upper()
+            if yn not in ['Y', 'N']:
+                print('Please enter a valid option')
+                continue
+            return yn
+
+    def display_ngram_results(self, results: dict):
+        best_score = results["best_score"]
+        best_key = results["best_key"]
+        best_plaintext = results["best_plaintext"]
+
+        print("="*60)
+        print(" N-GRAM DECRYPTION RESULT".center(60))
+        print("="*60)
+
+        print(f"Best Score: {best_score:.2f}")
+
+        print("\nKey Mapping:")
+        key_str = ''.join(best_key[c] for c in string.ascii_uppercase)
+        print(self.format_key_mapping(key_str))
+
+        print('\nDecrypted Plaintext (preview): ')
+        preview = best_plaintext.strip()
+        if not preview:
+            print("[No Plaintext Produced]")
+        else:
+            wrapped = textwrap.fill(preview, width=60)
+            max_chars = 800
+            if len(preview) > max_chars:
+                print(wrapped[:max_chars])
+                print('\n[...output truncated]')
+                yn = self.get_yn('View full text?')
+                if yn == 'Y':
+                    print(wrapped)
+            else:
+                print(wrapped)
+        
+        print('='*60)
+        
     # ========== BUSINESS LOGIC METHODS ==========
     def _handle_encrypt_decrypt(self):
         """Handle menu option 1: Encrypt/Decrypt File"""
@@ -318,6 +403,36 @@ class Program:
         
         self._wait_for_continue()
 
+    def _handle_ngram_decryption(self):
+        ciphertext = self.get_input_file()
+        method = self.get_crack_method()
+        input("Press Enter to begin decryption...")
+        d = Decrypter()
+
+        stop_event = threading.Event()
+        spinner_thread = threading.Thread(
+            target=self.loading_animation,
+            args=(stop_event,),
+            daemon=True
+        )
+        spinner_thread.start()
+
+        try:
+            results = d.crack(ciphertext, method, 10)
+        finally:
+            stop_event.set()
+            spinner_thread.join()
+
+        print()
+        self.display_ngram_results(results)
+        yn = self.get_yn('Would you like to write the decrypted text into an output file?')
+        if yn == "Y":
+            output_file = self.get_output_file()
+            with open(output_file, 'w') as f:
+                f.write(results["best_plaintext"])
+
+        self._wait_for_continue()
+
     # ========== MAIN RUN METHOD ==========
     def run(self):
         """Main program loop"""
@@ -335,8 +450,7 @@ class Program:
                     self._handle_batch_decryption()
                 case '5': # choose cipher and choose to encrypt or decrypt
                     self._handle_cipher_selection()
-                case '6':
-                    # Extra option two
-                    pass
+                case '6': # Decrypt substitution cipher without keyword list
+                    self._handle_ngram_decryption()
                 case '7':
                     self.exit_program()

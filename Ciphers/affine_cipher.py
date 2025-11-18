@@ -9,11 +9,11 @@ class AffineCipher(Cipher):
             raise ValueError(f'a and the length of the alphabet ({len(self._alphabet)}) must be coprime')
         self.b = key[1]
 
-    def _encryption_formula(self, ch: str):
+    def __encryption_formula(self, ch: str):
         num = (self.a * self._alphabet_index[ch] + self.b) % len(self._alphabet)
         return self._index_to_alphabet[num]
     
-    def _decryption_formula(self, ch: str):
+    def __decryption_formula(self, ch: str):
         num = (
             pow(self.a, -1, len(self._alphabet))
             * (self._alphabet_index[ch] - self.b)
@@ -27,9 +27,9 @@ class AffineCipher(Cipher):
                 encrypted.append(ch)
                 continue
             if ch.isupper():
-                encrypted.append(self._encryption_formula(ch))
+                encrypted.append(self.__encryption_formula(ch))
             else:
-                encrypted.append(self._encryption_formula(ch.upper()).lower())
+                encrypted.append(self.__encryption_formula(ch.upper()).lower())
         return ''.join(encrypted)
 
     def decrypt(self, text:str):
@@ -39,9 +39,9 @@ class AffineCipher(Cipher):
                 decrypted.append(ch)
                 continue
             if ch.isupper():
-                decrypted.append(self._decryption_formula(ch))
+                decrypted.append(self.__decryption_formula(ch))
             else:
-                decrypted.append(self._decryption_formula(ch.upper()).lower())
+                decrypted.append(self.__decryption_formula(ch.upper()).lower())
         return ''.join(decrypted)
 
     def __str__(self):
