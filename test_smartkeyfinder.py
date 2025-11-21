@@ -62,8 +62,8 @@ def test_decrypt_with_key_preserves_case(simple_decrypter):
     
     ciphertext = "Hello World"
     result = simple_decrypter.decrypt_with_key(ciphertext, key)
-    assert result[0].islower()  # 'h' should remain lowercase
-    assert result[6].isupper()  # 'W' should remain uppercase
+    assert result[0].isupper()  # 'H' should remain uppercase
+    assert result[1].islower()  # 'e' should remain lowercase
 
 
 def test_decrypt_with_key_preserves_special_chars(simple_decrypter):

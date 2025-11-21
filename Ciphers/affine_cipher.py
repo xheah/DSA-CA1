@@ -32,7 +32,8 @@ class AffineCipher(Cipher):
         Raises
         ------
         ValueError
-            If 'a' is not coprime with 26 (alphabet length).
+            If key does not have exactly 2 elements, or if 'a' is not coprime
+            with 26 (alphabet length).
         
         Notes
         -----
@@ -40,6 +41,8 @@ class AffineCipher(Cipher):
         Valid values for 'a' include: 1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25.
         """
         super().__init__()
+        if len(key) != 2:
+            raise ValueError("Affine key must be a list of exactly 2 integers [a, b]")
         self.a = key[0]
         if gcd(self.a, len(self._alphabet)) > 1:
             raise ValueError(f'a and the length of the alphabet ({len(self._alphabet)}) must be coprime')

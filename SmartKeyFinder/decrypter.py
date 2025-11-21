@@ -41,9 +41,12 @@ class Decrypter:
         self.english_frequency_order = list("ETAOINSHRDLCUMWFGYPBVKJXQZ")
         self.alphabet = string.ascii_uppercase
         self.ngram = NGramModel()
-        with open('sherlock_holmes.txt', 'r', encoding='utf-8') as f:
-            corpus = f.read()
-        self.ngram.train(corpus)
+        try:
+            with open('sherlock_holmes.txt', 'r', encoding='utf-8') as f:
+                corpus = f.read()
+            self.ngram.train(corpus)
+        except FileNotFoundError:
+            raise FileNotFoundError("sherlock_holmes.txt not found. Required for n-gram model training.")
     
     def decrypt_with_key(self, ciphertext: str, key: Dict[str, str]) -> str:
         """
@@ -115,16 +118,14 @@ class Decrypter:
             )
         )
 
-        for letter in self.alphabet:
-            if letter not in cipher_to_plain:
-                # Find an unused English letter
-                for eng_letter in self.english_frequency_order:
-                    if eng_letter not in cipher_to_plain.values():
-                        cipher_to_plain[letter] = eng_letter
-                        break
-                else:
-                    # If all English letters are used, map to itself
-                    cipher_to_plain[letter] = letter
+        # Get remaining letters more efficiently
+        used_plaintext = set(cipher_to_plain.values())
+        remaining_plaintext = [l for l in self.english_frequency_order if l not in used_plaintext]
+        remaining_ciphertext = [l for l in self.alphabet if l not in cipher_to_plain]
+        
+        # Zip remaining letters together
+        for cipher_letter, plain_letter in zip(remaining_ciphertext, remaining_plaintext):
+            cipher_to_plain[cipher_letter] = plain_letter
         
         return cipher_to_plain
 

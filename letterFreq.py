@@ -43,8 +43,8 @@ class LFD: # letter frequency distribution
     def infer_keyword(self, keywords: list):
         """Infer the keyword from a given text and a list of keyword candidates"""
         try:
-            with open('dictionary.txt', 'r') as f:
-                dictionary = set(word.strip() for word in f.read().split('\n') if word.strip())
+            with open('dictionary.txt', 'r', encoding='utf-8') as f:
+                dictionary = set(word.strip().upper() for word in f.read().split('\n') if word.strip())
         except FileNotFoundError:
             print("Error: dictionary.txt does not exist")
             return ''
@@ -55,11 +55,11 @@ class LFD: # letter frequency distribution
             kwc = KeywordCipher(keyword.strip().upper())
             decrypted = kwc.decrypt(self.__text)
             alpha_decrypted = ''.join(ch for ch in decrypted if ch.isalpha() or ch.isspace())
-            words_decrypted = [w for w in alpha_decrypted.split(' ') if w]
+            words_decrypted = alpha_decrypted.split()  # split() handles all whitespace
             total_words = len(words_decrypted)
             if total_words == 0:
                 continue
-            score = sum(1 for w in words_decrypted if w in dictionary)
+            score = sum(1 for w in words_decrypted if w.upper() in dictionary)
             scores[keyword] = round(score / total_words, 2)
         if not scores:
             return ''

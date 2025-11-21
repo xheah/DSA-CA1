@@ -236,8 +236,8 @@ def test_get_crack_method_hill(program, monkeypatch):
 
 
 def test_get_crack_method_anneal(program, monkeypatch):
-    """Test get_crack_method returns anneal for A"""
-    inputs = iter(['A'])
+    """Test get_crack_method returns anneal for SA"""
+    inputs = iter(['SA'])
     monkeypatch.setattr('builtins.input', lambda prompt='': next(inputs))
     
     result = program.get_crack_method()

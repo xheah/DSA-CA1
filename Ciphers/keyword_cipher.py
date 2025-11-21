@@ -11,7 +11,7 @@ class KeywordCipher(Cipher):
     
     Attributes
     ----------
-    _keyword : str
+    __keyword : str
         The keyword used to generate the cipher alphabet (uppercase).
     __keyword_cipher : str
         The generated cipher alphabet (26 unique letters).

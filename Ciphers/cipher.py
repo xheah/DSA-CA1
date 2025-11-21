@@ -77,14 +77,26 @@ class Cipher:
         -------
         str
             Transformed text with case preserved.
+        
+        Notes
+        -----
+        If a character is not in the standard alphabet or if transform_func raises
+        a KeyError, the original character is preserved as a fallback.
         """
         result = []
         for ch in text:
             if not ch.isalpha():
                 result.append(ch)
             else:
-                transformed = transform_func(ch.upper())
-                result.append(transformed if ch.isupper() else transformed.lower())
+                ch_upper = ch.upper()
+                if ch_upper not in self._alphabet:
+                    result.append(ch)  # Preserve non-standard characters
+                    continue
+                try:
+                    transformed = transform_func(ch_upper)
+                    result.append(transformed if ch.isupper() else transformed.lower())
+                except KeyError:
+                    result.append(ch)  # Fallback to original if mapping fails
         return ''.join(result)
     
     def encrypt(self, text: str):

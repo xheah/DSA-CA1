@@ -472,7 +472,7 @@ class Program:
         sys.stdout.write('\r' + ' ' * (len('Loading') + 5) + '\r')
         sys.stdout.flush()
 
-    def format_key_mapping(self, key: str) -> str:
+    def format_key_mapping(self, key) -> str:
         """
         Format substitution key mapping for display.
         
@@ -481,9 +481,11 @@ class Program:
         
         Parameters
         ----------
-        key : str
-            26-character string where key[i] represents the plaintext letter
+        key : str or dict of {str: str}
+            If str: 26-character string where key[i] represents the plaintext letter
             that corresponds to ciphertext letter chr(ord('A') + i).
+            If dict: Dictionary mapping ciphertext letters (uppercase) to plaintext
+            letters (uppercase).
         
         Returns
         -------
@@ -501,7 +503,12 @@ class Program:
         True
         """
         cipher_row = "CIPHER: " + " ".join(string.ascii_uppercase)
-        plain_row  = "PLAIN : " + " ".join(key)  # adjust if key is dict
+        # Handle both string and dict formats
+        if isinstance(key, dict):
+            key_str = ''.join(key[c] for c in string.ascii_uppercase)
+        else:
+            key_str = key
+        plain_row  = "PLAIN : " + " ".join(key_str)
         return cipher_row + "\n" + plain_row
     
     def get_yn(self, message: str):
